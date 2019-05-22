@@ -1,0 +1,63 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Description: Cyber Recovery Custom Test 
+
+Parameters:
+  Event1:
+    Description: Event1
+    Type: String
+  Event2:
+    Description: Event2
+    Type: String
+  Event3:
+    Description: Event3
+    Type: String
+
+Resources:
+  LambdaRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action:
+              - 'sts:AssumeRole'
+            Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+                - events.amazonaws.com
+        Version: 2012-10-17
+  CyberCustomPolicy:
+    Type: 'AWS::IAM::Policy'
+    Description: CyberCustomRole
+    Properties:
+      PolicyName: CyberCustomPolicy
+      PolicyDocument:
+        Statement:
+          - Action: '*'
+            Effect: Allow
+            Resource: '*'
+        Version: 2012-10-17
+      Roles:
+        - !Ref LambdaRole
+  Lambda:
+    Type: 'AWS::Lambda::Function'
+    Description: CyberCustomLambda
+    Properties: 
+      Code: ./code/
+      Description: Event1
+      Handler: lambda.handler
+      Role: !GetAtt LambdaRole.Arn
+      Runtime: python3.6
+      Timeout: 30
+  LambdaCustom:
+    Type: 'AWS::CloudFormation::CustomResource'
+    Description: CyberCustomResource
+    Properties: 
+      loglevel: debug
+      ServiceToken: !GetAtt Lambda.Arn
+      key1: !Ref Event1
+      key2: !Ref Event2
+      key3: !Ref Event3
+
+Outputs: {}
